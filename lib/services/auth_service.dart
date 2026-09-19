@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/usuario.dart';
+import '../models/producto.dart';
 
 class AuthService {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
@@ -134,4 +135,30 @@ class AuthService {
   Future<void> cerrarSesion() async {
     await storage.delete(key: 'token');
   }
+
+
+  Future<List<Producto>> obtenerProductos() async {
+    final respuesta = await http.get(
+      Uri.parse('https://fakestoreapi.com/products'),
+    );
+
+    if (respuesta.statusCode != 200) {
+      throw Exception(
+        'No se pudieron cargar los productos',
+      );
+    }
+
+    final datos = jsonDecode(respuesta.body);
+
+    List<Producto> productos = [];
+
+    for (final dato in datos) {
+      productos.add(
+        Producto.fromJson(dato),
+      );
+    }
+
+    return productos;
+  }
+
 }
