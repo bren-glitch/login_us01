@@ -71,14 +71,21 @@ class AuthService {
 
     Usuario? usuarioEncontrado;
 
-    for (final usuario in usuarios) {
-      if (usuario.username == username) {
-        usuarioEncontrado = usuario;
-        break;
-      }
-    }
+        for (final usuario in usuarios) {
+          if (usuario.username == username) {
+            usuarioEncontrado = usuario;
+            break;
+          }
+        }
 
-    return usuarioEncontrado;
+        if (usuarioEncontrado != null) {
+          await storage.write(
+            key: 'rol',
+            value: usuarioEncontrado.rol,
+          );
+        }
+
+        return usuarioEncontrado;
   }
 
   // Obtener usuarios de la API
@@ -208,6 +215,30 @@ Future<List<Producto>> obtenerProductosPorCategoria(
   }
 
   return productos;
+}
+
+Future<Producto> obtenerProductoPorId(int id) async {
+  final respuesta = await http.get(
+    Uri.parse(
+      'https://fakestoreapi.com/products/$id',
+    ),
+  );
+
+  if (respuesta.statusCode != 200) {
+    throw Exception(
+      'Producto no disponible',
+    );
+  }
+
+  final datos = jsonDecode(respuesta.body);
+
+  return Producto.fromJson(datos);
+}
+
+Future<String?> obtenerRol() async {
+  return await storage.read(
+    key: 'rol',
+  );
 }
 
 }

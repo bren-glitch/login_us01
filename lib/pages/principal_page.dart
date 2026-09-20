@@ -4,6 +4,7 @@ import '../models/usuario.dart';
 import '../models/producto.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
+import 'detalle_producto_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   final Usuario usuario;
@@ -276,7 +277,19 @@ class _PrincipalPageState extends State<PrincipalPage> {
       itemBuilder: (context, index) {
         final producto = productos[index];
 
-        return Card(
+      return InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetalleProductoPage(
+                productoId: producto.id,
+                authService: widget.authService,
+              ),
+            ),
+          );
+        },
+        child: Card(
           margin: const EdgeInsets.only(bottom: 15),
           child: Padding(
             padding: const EdgeInsets.all(10),
@@ -317,7 +330,8 @@ class _PrincipalPageState extends State<PrincipalPage> {
               ],
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }
