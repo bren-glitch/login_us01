@@ -160,5 +160,54 @@ class AuthService {
 
     return productos;
   }
+  Future<List<String>> obtenerCategorias() async {
+  final respuesta = await http.get(
+    Uri.parse('https://fakestoreapi.com/products/categories'),
+  );
+
+  if (respuesta.statusCode != 200) {
+    throw Exception(
+      'No se pudieron cargar las categorías',
+    );
+  }
+
+  final datos = jsonDecode(respuesta.body);
+
+  List<String> categorias = [];
+
+  for (final dato in datos) {
+    categorias.add(dato);
+  }
+
+  return categorias;
+}
+
+Future<List<Producto>> obtenerProductosPorCategoria(
+  String categoria,
+) async {
+  final respuesta = await http.get(
+    Uri.parse(
+      'https://fakestoreapi.com/products/category/$categoria',
+    ),
+  );
+
+  if (respuesta.statusCode != 200) {
+    throw Exception(
+      'No se pudieron cargar los productos de la categoría',
+    );
+  }
+
+  final datos = jsonDecode(respuesta.body);
+
+  List<Producto> productos = [];
+
+  for (final dato in datos) {
+    productos.add(
+      Producto.fromJson(dato),
+    );
+  }
+
+  return productos;
+}
 
 }

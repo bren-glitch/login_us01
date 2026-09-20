@@ -21,23 +21,98 @@ class PrincipalPage extends StatefulWidget {
 
 class _PrincipalPageState extends State<PrincipalPage> {
   List<Producto> productos = [];
+  List<String> categorias = [];
+
   bool cargando = true;
   String? error;
+  String? categoriaSeleccionada;
 
   @override
   void initState() {
     super.initState();
-    cargarProductos();
+    cargarDatos();
   }
 
-  Future<void> cargarProductos() async {
+  Future<void> cargarDatos() async {
     setState(() {
       cargando = true;
       error = null;
+      productos = [];
     });
 
     try {
-      final resultado = await widget.authService.obtenerProductos();
+      final categoriasObtenidas =
+          await widget.authService.obtenerCategorias();
+
+      final productosObtenidos =
+          await widget.authService.obtenerProductos();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        categorias = categoriasObtenidas;
+        productos = productosObtenidos;
+        cargando = false;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        cargando = false;
+        error = 'No se pudieron cargar los productos.';
+      });
+    }
+  }
+
+  Future<void> seleccionarCategoria(String categoria) async {
+    setState(() {
+      categoriaSeleccionada = categoria;
+      cargando = true;
+      error = null;
+      productos = [];
+    });
+
+    try {
+      final resultado =
+          await widget.authService.obtenerProductosPorCategoria(
+        categoria,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        productos = resultado;
+        cargando = false;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        cargando = false;
+        error = 'No se pudieron cargar los productos.';
+      });
+    }
+  }
+
+  Future<void> verTodos() async {
+    setState(() {
+      categoriaSeleccionada = null;
+      cargando = true;
+      error = null;
+      productos = [];
+    });
+
+    try {
+      final resultado =
+          await widget.authService.obtenerProductos();
 
       if (!mounted) {
         return;
@@ -82,7 +157,9 @@ class _PrincipalPageState extends State<PrincipalPage> {
         title: const Text('Catálogo de productos'),
         actions: [
           IconButton(
-            onPressed: cargarProductos,
+            onPressed: categoriaSeleccionada == null
+                ? cargarDatos
+                : verTodos,
             icon: const Icon(Icons.refresh),
           ),
           IconButton(
@@ -91,7 +168,59 @@ class _PrincipalPageState extends State<PrincipalPage> {
           ),
         ],
       ),
-      body: construirContenido(),
+      body: Column(
+        children: [
+          construirFiltro(),
+          Expanded(
+            child: construirContenido(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget construirFiltro() {
+    if (categorias.isEmpty) {
+      return const SizedBox();
+    }
+
+    return SizedBox(
+      height: 55,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 8,
+        ),
+        children: [
+          ChoiceChip(
+            label: const Text('Ver todos'),
+            selected: categoriaSeleccionada == null,
+            onSelected: (seleccionado) {
+              if (seleccionado) {
+                verTodos();
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+          ...categorias.map(
+            (categoria) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(
+                  label: Text(categoria),
+                  selected: categoriaSeleccionada == categoria,
+                  onSelected: (seleccionado) {
+                    if (seleccionado) {
+                      seleccionarCategoria(categoria);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -120,10 +249,23 @@ class _PrincipalPageState extends State<PrincipalPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: cargarProductos,
+              onPressed: categoriaSeleccionada == null
+                  ? cargarDatos
+                  : () => seleccionarCategoria(
+                        categoriaSeleccionada!,
+                      ),
               child: const Text('Reintentar'),
             ),
           ],
+        ),
+      );
+    }
+
+    if (productos.isEmpty) {
+      return const Center(
+        child: Text(
+          'No hay productos disponibles.',
+          style: TextStyle(fontSize: 18),
         ),
       );
     }
@@ -180,4 +322,3 @@ class _PrincipalPageState extends State<PrincipalPage> {
     );
   }
 }
-
