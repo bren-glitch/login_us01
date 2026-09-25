@@ -241,4 +241,33 @@ Future<String?> obtenerRol() async {
   );
 }
 
+Future<Map<String, dynamic>> crearProducto(
+  Producto producto,
+) async {
+  final respuesta = await http.post(
+    Uri.parse('https://fakestoreapi.com/products'),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'title': producto.title,
+      'price': producto.price,
+      'description': producto.description,
+      'image': producto.image,
+      'category': producto.category,
+    }),
+  );
+
+  if (respuesta.statusCode != 200 &&
+      respuesta.statusCode != 201) {
+    throw Exception(
+      'No se pudo crear el producto',
+    );
+  }
+
+  final datos = jsonDecode(respuesta.body);
+
+  return datos;
+}
+
 }

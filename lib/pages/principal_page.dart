@@ -5,6 +5,7 @@ import '../models/producto.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
 import 'detalle_producto_page.dart';
+import 'agregar_producto_page.dart';
 
 class PrincipalPage extends StatefulWidget {
   final Usuario usuario;
@@ -157,6 +158,21 @@ class _PrincipalPageState extends State<PrincipalPage> {
       appBar: AppBar(
         title: const Text('Catálogo de productos'),
         actions: [
+          if (widget.usuario.rol == 'Administrador')
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AgregarProductoPage(
+                      authService: widget.authService,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              tooltip: 'Agregar producto',
+            ),
           IconButton(
             onPressed: categoriaSeleccionada == null
                 ? cargarDatos
