@@ -270,4 +270,33 @@ Future<Map<String, dynamic>> crearProducto(
   return datos;
 }
 
+Future<Map<String, dynamic>> editarProducto(
+  Producto producto,
+) async {
+  final respuesta = await http.put(
+    Uri.parse(
+      'https://fakestoreapi.com/products/${producto.id}',
+    ),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'title': producto.title,
+      'price': producto.price,
+      'description': producto.description,
+      'category': producto.category,
+    }),
+  );
+
+  if (respuesta.statusCode != 200) {
+    throw Exception(
+      'No se pudo actualizar el producto',
+    );
+  }
+
+  final datos = jsonDecode(respuesta.body);
+
+  return datos;
+}
+
 }

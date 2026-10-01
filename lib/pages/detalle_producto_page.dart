@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/producto.dart';
 import '../services/auth_service.dart';
+import 'editar_producto_page.dart';
+
+
 
 class DetalleProductoPage extends StatefulWidget {
   final int productoId;
@@ -192,23 +195,39 @@ class _DetalleProductoPageState
           const SizedBox(height: 30),
 
           if (rol == 'Administrador')
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Editar'),
-                  ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                  final productoActualizado = await Navigator.push<Producto>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditarProductoPage(
+                          producto: producto!,
+                          authService: widget.authService,
+                        ),
+                      ),
+                    );
+
+                    if (productoActualizado != null) {
+                      setState(() {
+                        producto = productoActualizado;
+                      });
+                    } 
+                  },
+                  child: const Text('Editar'),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Eliminar'),
-                  ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text('Eliminar'),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ],
       ),
     );
