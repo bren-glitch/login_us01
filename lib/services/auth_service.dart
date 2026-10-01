@@ -299,4 +299,18 @@ Future<Map<String, dynamic>> editarProducto(
   return datos;
 }
 
+Future<void> eliminarProducto(int id) async {
+  final respuesta = await http.delete(
+    Uri.parse(
+      'https://fakestoreapi.com/products/$id',
+    ),
+  );
+
+  if (respuesta.statusCode != 200) {
+    throw Exception(
+      'No se pudo eliminar el producto',
+    );
+  }
+}
+
 }

@@ -220,9 +220,72 @@ class _DetalleProductoPageState
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
+             
+             Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final confirmar = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Eliminar producto'),
+                          content: const Text(
+                            '¿Estás seguro de eliminar este producto?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, false);
+                              },
+                              child: const Text('Cancelar'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                              },
+                              child: const Text('Eliminar'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmar != true) {
+                      return;
+                    }
+
+                    try {
+                      await widget.authService.eliminarProducto(
+                        producto!.id,
+                      );
+
+                      if (!mounted) {
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Producto eliminado correctamente.',
+                          ),
+                        ),
+                      );
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      if (!mounted) {
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'No se pudo eliminar el producto.',
+                          ),
+                        ),
+                      );
+                    }
+                  },
                   child: const Text('Eliminar'),
                 ),
               ),
